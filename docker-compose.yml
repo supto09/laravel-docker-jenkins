@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+
+  # PHP Service
+  php:
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    container_name: app
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+
+  # Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    working_dir: /var/www/html
+    ports:
+      - "8080:80"
+      - "443:443"
+    networks:
+      - app-network
+
+
+  # MySql Database
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - "4306:3306"
+    env_file: ./src/.env
+    volumes:
+      - db-data:/var/lib/mysql/
+    networks:
+      - app-network
+
+
+  # PhpMyAdmin
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - '8081:80'
+    env_file: ./src/.env
+    volumes:
+      - db-data:/var/lib/mysql/
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+
+volumes:
+  db-data:
+    driver: local
