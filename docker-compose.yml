@@ -30,7 +30,7 @@ services:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
     working_dir: /var/www/html
     ports:
-      - "8080:80"
+      - "9090:80"
       - "443:443"
     networks:
       - app-network
@@ -57,7 +57,7 @@ services:
     image: phpmyadmin:latest
     restart: always
     ports:
-      - '8081:80'
+      - '9091:80'
     env_file: ./src/.env
     volumes:
       - db-data:/var/lib/mysql/
